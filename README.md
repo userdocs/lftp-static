@@ -1,16 +1,23 @@
 
-This script is designed to be run and used on Alpine Linux stable
+This script is designed to be run and used on Alpine Linux stable via docker
+## Docker
 
-I used Alpine Linux instances on https://www.scaleway.com/en/ for testing.
+To build using docker run this command
 
-## Instructions
+```bash
+docker run -it -v $HOME:/root alpine:latest /bin/ash -c 'apk update && apk add bash curl tar && cd && curl -sL git.io/JvOIC | bash -s all'
+```
+
+## Manual Instructions
 
 We need `bash` to run this script and Alpine Linux defaults to `ash`
 
 After you `ssh` into your server run this command to install `bash`.
 
-~~~
-apk add bash
+Install these dependencies
+
+~~~bash
+apk add bash curl tar
 ~~~
 
 ## Download the script
@@ -25,7 +32,8 @@ Now you can use it like with this command:
 ~/build-script.sh
 ~~~
 
-## Download lftp static x86_64
+
+## Download lftp static x86_64 release
 
 ~~~
 mkdir -p ~/bin && source ~/.profile
