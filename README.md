@@ -40,3 +40,26 @@ mkdir -p ~/bin && source ~/.profile
 wget -qO ~/bin/lftp https://github.com/userdocs/lftp-static/releases/latest/download/lftp
 chmod 700 ~/bin/lftp
 ~~~
+
+## Build it yourself on Alpine
+
+```bash
+CDN_URL="http://dl-cdn.alpinelinux.org/alpine/edge/main"
+#
+apk update --repository="${CDN_URL}"
+apk upgrade --repository="${CDN_URL}"
+apk add autoconf automake build-base cmake curl git libtool linux-headers perl pkgconf python3 python3-dev re2c tar --repository="${CDN_URL}"
+apk add readline-dev readline-static ncurses-dev ncurses-static expat-dev expat-static libunistring-dev libunistring-static gettext-dev gettext-static zlib-dev zlib-static libidn-dev openssl-dev openssl-libs-static --repository="${CDN_URL}"
+#
+wget https://github.com/userdocs/lftp-static/raw/master/src/lftp-4.9.2.tar.gz
+tar xf lftp-4.9.2.tar.gz
+cd lftp-4.9.2
+#
+export CXXFLAGS="--static -static -std=c++14"
+export CPPFLAGS="--static -static"
+export LDFLAGS="--static -static"
+#
+./configure LIBS="-l:libreadline.a -l:libncursesw.a" --prefix="$HOME/test" --with-openssl --without-gnutls --enable-static --enable-threads=posix
+make -j"$(nproc)"
+make install
+```
