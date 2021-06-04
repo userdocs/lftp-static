@@ -71,21 +71,21 @@ jobs:
         run: docker exec multiarch mv -f /root/bin/${{ matrix.name }} /root/bin/${{ matrix.name }}-${{ matrix.arch }}
 
       - name: Create path to binary env
-        run: echo "lftp_path=$(echo ${{ github.workspace }}/bin/${{ matrix.name }}-${{ matrix.arch }})" >> $GITHUB_ENV
+        run: echo "binary_path=$(echo ${{ github.workspace }}/bin/${{ matrix.name }}-${{ matrix.arch }})" >> $GITHUB_ENV
 
       - name: Create release name env
-        run: echo "lftp_release_name=$(strings ${{ env.lftp_path }} strings -d lftp | sed -rn 's|^(lftp)/(.*)|\1 \2|p' | head -n 1)" >> $GITHUB_ENV
+        run: echo "binary_release_name=$(strings -d ${{ env.binary_path }} | sed -rn 's|^(lftp)/(.*)|\1 \2|p' | head -n 1)" >> $GITHUB_ENV
 
       - name: Create tag env
-        run: echo 'lftp_tag='$(strings ${{ env.lftp_path }} strings -d lftp | sed -rn 's|^(lftp)/(.*)|\2|p' | head -n 1) >> $GITHUB_ENV
+        run: echo 'binary_tag='$(strings -d ${{ env.binary_path }} | sed -rn 's|^(lftp)/(.*)|\2|p' | head -n 1) >> $GITHUB_ENV
 
       - name: "Create release"
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          artifacts: "${{ env.lftp_path }}"
+          artifacts: "${{ env.binary_path }}"
           replacesArtifacts: true
-          tag: "${{ env.lftp_tag }}"
-          name: "${{ env.lftp_release_name }}"
+          tag: "${{ env.binary_tag }}"
+          name: "${{ env.binary_release_name }}"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
