@@ -26,12 +26,15 @@ jobs:
             docker_arch: linux/ppc64le
           - arch: s390x
             docker_arch: linux/s390x
+
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
+
     env:
       CDN: http://dl-cdn.alpinelinux.org/alpine/edge/main/
       CXXFLAGS: "--static -static -std=c++17"
       CPPFLAGS: "--static -static"
       LDFLAGS: "--static -static"
+
     steps:
       - uses: actions/checkout@v2.3.4
 
