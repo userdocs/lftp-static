@@ -26,9 +26,7 @@ jobs:
             docker_arch: linux/ppc64le
           - arch: s390x
             docker_arch: linux/s390x
-
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
-
     env:
       CDN: http://dl-cdn.alpinelinux.org/alpine/edge/main/
       CXXFLAGS: --static -static -std=c++17
@@ -49,25 +47,25 @@ jobs:
       - name: Run apk upgrade
         run: docker exec multiarch apk upgrade --repository=${{ env.CDN }}
 
-      - name: apk install the core build dependencies
+      - name: Run apk to install the core build dependencies
         run: docker exec multiarch apk add autoconf automake build-base curl git libtool linux-headers perl pkgconf python3 python3-dev tar
 
-      - name: apk install the core lftp dependencies
+      - name: Run apk to install the core ${{ matrix.name }} dependencies
         run: docker exec multiarch apk add expat-dev expat-static gettext-dev gettext-static libidn-dev libunistring-dev libunistring-static ncurses-dev ncurses-static openssl-dev openssl-libs-static readline-dev readline-static zlib-dev zlib-static
 
-      - name: Download hosted lftp source
+      - name: Download hosted ${{ matrix.name }} source
         run: docker exec multiarch curl -sL https://github.com/userdocs/lftp-static/raw/master/src/lftp-4.9.2.tar.gz -o lftp-4.9.2.tar.gz
 
-      - name: Extract lftp source
+      - name: Extract ${{ matrix.name }} source
         run: tar xf lftp-4.9.2.tar.gz
 
       - name: Configure
         run: docker exec multiarch bash -c 'cd /root/lftp-4.9.2 && ./configure LIBS="-l:libreadline.a -l:libncursesw.a" --prefix="/root" --with-openssl --without-gnutls --enable-static --enable-threads=posix'
 
-      - name: Build
+      - name: Build ${{ matrix.name }}
         run: docker exec multiarch bash -c 'cd /root/lftp-4.9.2 && make -j"$(nproc)" && make install'
 
-      - name: Rename lftp to ${{ matrix.arch }}
+      - name: Rename ${{ matrix.name }} to ${{ matrix.name }}-${{ matrix.arch }}
         run: docker exec multiarch mv -f /root/bin/${{ matrix.name }} /root/bin/${{ matrix.name }}-${{ matrix.arch }}
 
       - name: Create path to binary env
