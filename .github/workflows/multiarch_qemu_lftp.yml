@@ -34,6 +34,7 @@ jobs:
       CXXFLAGS: "--static -static -std=c++17"
       CPPFLAGS: "--static -static"
       LDFLAGS: "--static -static"
+      lftp_version: lftp-4.9.2
 
     steps:
       - uses: actions/checkout@v2.3.4
@@ -57,19 +58,22 @@ jobs:
         run: docker exec multiarch apk add expat-dev expat-static gettext-dev gettext-static libidn-dev libunistring-dev libunistring-static ncurses-dev ncurses-static openssl-dev openssl-libs-static readline-dev readline-static zlib-dev zlib-static
 
       - name: Download hosted ${{ matrix.name }} source
-        run: docker exec multiarch curl -sL https://github.com/userdocs/lftp-static/raw/master/src/lftp-4.9.2.tar.gz -o lftp-4.9.2.tar.gz
+        run: docker exec multiarch curl -sL https://github.com/userdocs/lftp-static/raw/master/src/${{ env.lftp_version }}.tar.gz -o ${{ env.lftp_version }}.tar.gz
 
       - name: Extract ${{ matrix.name }} source
-        run: tar xf lftp-4.9.2.tar.gz
+        run: tar xf ${{ env.lftp_version }}.tar.gz
 
       - name: Configure
-        run: docker exec multiarch bash -c 'cd /root/lftp-4.9.2 && ./configure LIBS="-l:libreadline.a -l:libncursesw.a" --prefix="/root" --with-openssl --without-gnutls --enable-static --enable-threads=posix'
+        run: docker exec -w /root/${{ env.lftp_version }} multiarch ./configure LIBS="-l:libreadline.a -l:libncursesw.a" --prefix="/root" --with-openssl --without-gnutls --enable-static --enable-threads=posix
 
-      - name: Build ${{ matrix.name }}
-        run: docker exec multiarch bash -c 'cd /root/lftp-4.9.2 && make -j$(nproc) && make install'
+      - name: Make Build ${{ matrix.name }}
+        run: docker exec -w /root/${{ env.lftp_version }} multiarch make -j$(nproc)
+
+      - name: Make install Build ${{ matrix.name }}
+        run: docker exec -w /root/${{ env.lftp_version }} multiarch make install
 
       - name: Rename ${{ matrix.name }} to ${{ matrix.name }}-${{ matrix.arch }}
-        run: docker exec multiarch mv -f /root/bin/${{ matrix.name }} /root/bin/${{ matrix.name }}-${{ matrix.arch }}
+        run: docker exec -w /root/bin multiarch mv -f ${{ matrix.name }} ${{ matrix.name }}-${{ matrix.arch }}
 
       - name: Create path to binary env
         run: echo "binary_path=$(echo ${{ github.workspace }}/bin/${{ matrix.name }}-${{ matrix.arch }})" >> $GITHUB_ENV
